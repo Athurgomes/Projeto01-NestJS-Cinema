@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  name String?
+  password String
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model Genero {
+  id     Int     @id @default(autoincrement())
+  nome   String  @unique
+  filmes Filme[]
+}
+
+model Filme {
+  id                  Int      @id @default(autoincrement())
+  titulo              String
+  generoId            Int
+  duracao             Int      //duração em minutos
+  classificacaoEtaria String
+  genero              Genero   @relation(fields: [generoId], references: [id])
+  sessoes             Sessao[]
+}
+
+model Sala {
+  id         Int      @id @default(autoincrement())
+  numero     String   @unique
+  capacidade Int
+  sessoes    Sessao[]
+}
+
+model Sessao {
+  id            Int        @id @default(autoincrement())
+  filmeId       Int
+  salaId        Int
+  dataHorario   DateTime
+  valorIngresso Float
+  filme         Filme      @relation(fields: [filmeId], references: [id])
+  sala          Sala       @relation(fields: [salaId], references: [id])
+  ingressos     Ingresso[]
+}
+
+model Ingresso {
+  id        Int     @id @default(autoincrement())
+  sessaoId  Int
+  pedidoId  Int?    // Opcional, pois pode ser atrelado a um pedido depois
+  tipo      String  // Ex: "Inteira", "Meia"
+  valorPago Float
+  sessao    Sessao  @relation(fields: [sessaoId], references: [id])
+  pedido    Pedido? @relation(fields: [pedidoId], references: [id])
+}
+
+model LancheCombo {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  descricao String?
+  preco     Float
+  pedidos   Pedido[]  //relação N:M implícita do Prisma
+}
+
+model Pedido {
+  id          Int           @id @default(autoincrement())
+  valorTotal  Float         @default(0)
+  dataHora    DateTime      @default(now())
+  ingressos   Ingresso[]
+  lanches     LancheCombo[] //relação N:M
+}
+
