@@ -13,6 +13,8 @@ RUN npm install
 # Copia o resto do código do frontend
 COPY . .
 
+RUN chmod -R 777 /app/node_modules/.bin
+
 # Expõe a porta padrão do Vite
 EXPOSE 5173
 

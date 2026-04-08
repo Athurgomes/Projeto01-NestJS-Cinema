@@ -16,7 +16,7 @@ services:
       retries: 5
     # Mantém o ficheiro SQLite persistente na sua máquina
     volumes:
-      - ./prisma/dev.db:/app/prisma/dev.db 
+      - ./prisma/cinema.db:/app/prisma/cinema.db
 
   frontend:
     build:
@@ -28,6 +28,11 @@ services:
     env_file:
       - ./cinema-frontend/.env
     # A mágica da orquestração: só sobe o React quando a API estiver 100% pronta
+
+    volumes:
+      - ./cinema-frontend:/app
+      - /app/node_modules
+      
     depends_on:
       backend:
         condition: service_healthy
