@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: . # Usa a pasta raiz para construir a imagem
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    # Diz ao Docker para ler as variáveis do seu ficheiro .env local
+    env_file:
+      - .env
+    # Regra de Healthcheck: Valida se a API responde antes de liberar o frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api"] # Testa o Swagger
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Mantém o ficheiro SQLite persistente na sua máquina
+    volumes:
+      - ./prisma/dev.db:/app/prisma/dev.db 
+
+  frontend:
+    build:
+      context: ./cinema-frontend # Aponta para a subpasta do React
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    # Diz ao Docker para ler o .env que está dentro do frontend
+    env_file:
+      - ./cinema-frontend/.env
+    # A mágica da orquestração: só sobe o React quando a API estiver 100% pronta
+    depends_on:
+      backend:
+        condition: service_healthy
